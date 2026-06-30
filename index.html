@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>安心伴老 — 方言语音控制 · 给爸妈的智能陪伴</title>
+<title>安心伴老 — 智慧养老，温情陪伴</title>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;600;700;900&family=Noto+Serif+SC:wght@400;600;700;900&display=swap');
 
@@ -15,7 +15,6 @@
     --coral-dark: #B85D45;
     --jade: #7BAF9B;
     --jade-deep: #5C9680;
-    --purple: #8B63D9;
     --text: #2B1A0B;
     --text-sub: #6E6258;
     --text-hint: #9A8F83;
@@ -24,6 +23,7 @@
   }
 
   * { margin: 0; padding: 0; box-sizing: border-box; }
+
   html { scroll-behavior: smooth; }
 
   body {
@@ -36,17 +36,20 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* ───── Animation Utilities ────────── */
   @keyframes fadeUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes float { 0%,100% { transform: translateY(0) rotate(0deg); } 33% { transform: translateY(-14px) rotate(0.5deg); } 66% { transform: translateY(-6px) rotate(-0.3deg); } }
   @keyframes pulse { 0%,100% { transform: scale(1); opacity: 0.35; } 50% { transform: scale(1.06); opacity: 0.55; } }
-  @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
-  @keyframes wave { 0%,100%{transform:scaleY(1)} 25%{transform:scaleY(2.2)} 50%{transform:scaleY(0.6)} 75%{transform:scaleY(1.8)} }
-  @keyframes ripple { 0%{transform:scale(0.8);opacity:0.6} 100%{transform:scale(1.6);opacity:0} }
+  @keyframes shimmer { 0% { background-position: -200% center; } 100% { background-position: 200% center; } }
+  @keyframes drawCircle { to { stroke-dashoffset: 0; } }
 
   .reveal { animation: fadeUp 0.8s cubic-bezier(0.16,1,0.3,1) both; }
-  .d1 { animation-delay: 0.1s; } .d2 { animation-delay: 0.2s; } .d3 { animation-delay: 0.3s; }
-  .d4 { animation-delay: 0.4s; } .d5 { animation-delay: 0.5s; }
+  .reveal-d1 { animation-delay: 0.1s; } .reveal-d2 { animation-delay: 0.2s; }
+  .reveal-d3 { animation-delay: 0.3s; } .reveal-d4 { animation-delay: 0.4s; }
+  .reveal-d5 { animation-delay: 0.5s; } .reveal-d6 { animation-delay: 0.6s; }
 
-  /* ── Nav ─────────────────────────── */
+  /* ───── Navigation ─────────────────── */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
     backdrop-filter: blur(24px) saturate(180%);
@@ -55,464 +58,552 @@
     border-bottom: 1px solid rgba(0,0,0,0.04);
     padding: 0 56px; height: 76px;
     display: flex; align-items: center; justify-content: space-between;
+    transition: all 0.3s;
   }
-  .nav-logo { font-family: 'Noto Serif SC', serif; font-size: 26px; font-weight: 900; color: var(--text); letter-spacing: 3px; }
+  nav.scrolled { height: 64px; background: rgba(255,247,234,0.85); box-shadow: 0 1px 20px rgba(0,0,0,0.04); }
+
+  .nav-logo { font-family: 'Noto Serif SC', serif; font-size: 26px; font-weight: 900; color: var(--text); letter-spacing: 3px; display: flex; align-items: center; gap: 4px; }
+  .nav-logo .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--coral-deep); display: inline-block; margin: 0 1px; }
+  .nav-links { display: flex; gap: 40px; list-style: none; align-items: center; }
+  .nav-links a { text-decoration: none; color: var(--text-sub); font-size: 15px; font-weight: 500; transition: color 0.3s; position: relative; }
+  .nav-links a::after { content: ''; position: absolute; bottom: -4px; left: 0; width: 0; height: 2px; background: var(--coral-deep); border-radius: 1px; transition: width 0.3s; }
+  .nav-links a:hover { color: var(--coral-deep); }
+  .nav-links a:hover::after { width: 100%; }
   .nav-cta {
     background: var(--coral-deep); color: #fff; border: none;
     padding: 10px 28px; border-radius: 28px; font-size: 15px;
-    font-weight: 700; cursor: pointer; letter-spacing: 1px;
-    text-decoration: none; display: inline-flex; align-items: center;
+    font-weight: 700; cursor: pointer; transition: all 0.35s;
+    font-family: 'Noto Sans SC', sans-serif; letter-spacing: 1px;
   }
-  .nav-cta:hover { background: var(--coral-dark); }
+  .nav-cta:hover { background: var(--coral-dark); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(210,115,90,0.4); }
 
-  /* ── Hero ────────────────────────── */
+  /* ───── Hero ───────────────────────── */
   .hero {
     min-height: 100vh; display: flex; align-items: center;
-    padding: 140px 80px 100px; position: relative; overflow: hidden;
+    padding: 140px 80px 100px;
+    position: relative; overflow: hidden;
   }
+
+  /* Hero background geometry */
   .hero-geo {
     position: absolute; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none;
   }
   .hero-geo .orb1 {
-    position: absolute; top: -25%; right: -10%; width: 800px; height: 800px;
-    background: radial-gradient(circle at 55% 45%, rgba(139,99,217,0.10) 0%, rgba(139,99,217,0.03) 45%, transparent 70%);
+    position: absolute; top: -25%; right: -12%; width: 820px; height: 820px;
+    background: radial-gradient(circle at 55% 45%, rgba(242,152,126,0.15) 0%, rgba(242,152,126,0.04) 45%, transparent 70%);
     border-radius: 50%; animation: pulse 8s ease-in-out infinite;
   }
   .hero-geo .orb2 {
-    position: absolute; bottom: -15%; left: -8%; width: 600px; height: 600px;
-    background: radial-gradient(circle at 40% 50%, rgba(242,152,126,0.08) 0%, transparent 70%);
+    position: absolute; bottom: -18%; left: -8%; width: 620px; height: 620px;
+    background: radial-gradient(circle at 40% 50%, rgba(123,175,155,0.10) 0%, rgba(123,175,155,0.02) 50%, transparent 72%);
     border-radius: 50%; animation: pulse 10s ease-in-out infinite; animation-delay: 3s;
   }
+  .hero-geo .orb3 {
+    position: absolute; top: 40%; left: 50%; width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(255,154,61,0.06) 0%, transparent 65%);
+    border-radius: 50%; animation: pulse 7s ease-in-out infinite; animation-delay: 5s;
+  }
+  .hero-geo .ring {
+    position: absolute; top: 15%; right: 18%;
+    width: 360px; height: 360px;
+    border: 1.5px solid rgba(242,152,126,0.15);
+    border-radius: 50%;
+    animation: float 12s ease-in-out infinite;
+  }
+  .hero-geo .ring2 {
+    position: absolute; bottom: 25%; left: 15%;
+    width: 240px; height: 240px;
+    border: 1px solid rgba(123,175,155,0.12);
+    border-radius: 50%;
+    animation: float 10s ease-in-out infinite; animation-delay: 4s;
+  }
+  .hero-geo .grid-dots {
+    position: absolute; top: 8%; right: 22%;
+    width: 200px; height: 200px;
+    background-image: radial-gradient(circle, rgba(242,152,126,0.18) 1px, transparent 1px);
+    background-size: 28px 28px;
+    animation: float 14s ease-in-out infinite; animation-delay: 2s;
+  }
 
-  .hero-content { max-width: 580px; position: relative; z-index: 2; }
+  .hero-content { max-width: 560px; position: relative; z-index: 2; }
   .hero-badge {
     display: inline-flex; align-items: center; gap: 8px;
-    background: rgba(139,99,217,0.12); color: var(--purple);
+    background: rgba(242,152,126,0.12); color: var(--coral-deep);
     padding: 7px 20px; border-radius: 24px; font-size: 14px;
     font-weight: 700; margin-bottom: 32px; letter-spacing: 1.5px;
-    border: 1px solid rgba(139,99,217,0.18);
+    border: 1px solid rgba(242,152,126,0.18);
   }
+  .hero-badge .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--coral-deep); animation: pulse 2s ease-in-out infinite; }
+
   .hero h1 {
     font-family: 'Noto Serif SC', serif;
-    font-size: 60px; font-weight: 900; line-height: 1.18; letter-spacing: 3px;
+    font-size: 68px; font-weight: 900; line-height: 1.18; letter-spacing: 3px;
     margin-bottom: 28px; color: var(--text);
   }
   .hero h1 .grad {
-    background: linear-gradient(135deg, #8B63D9 0%, #A78BFA 50%, #7C5CC5 100%);
+    background: linear-gradient(135deg, #D2735A 0%, #E8826B 35%, #F2987E 70%, #D2735A 100%);
     background-size: 200% auto;
     -webkit-background-clip: text; -webkit-text-fill-color: transparent;
     background-clip: text;
+    animation: shimmer 4s linear infinite;
   }
-  .hero-desc { font-size: 20px; color: var(--text-sub); line-height: 1.9; margin-bottom: 12px; font-weight: 400; }
-  .hero-desc strong { color: var(--purple); font-weight: 800; }
-  .hero-list { list-style: none; margin-bottom: 32px; }
-  .hero-list li { font-size: 16px; color: var(--text-sub); padding: 3px 0; display: flex; align-items: center; gap: 8px; }
-  .hero-list li::before { content: '✓'; color: var(--jade-deep); font-weight: 900; font-size: 18px; }
+
+  .hero-desc { font-size: 18px; color: var(--text-sub); line-height: 1.9; margin-bottom: 42px; font-weight: 400; max-width: 440px; }
+
   .hero-btns { display: flex; gap: 16px; align-items: center; flex-wrap: wrap; }
 
   .btn-primary {
-    background: linear-gradient(135deg, #8B63D9, #7249C4); color: #fff; border: none;
+    background: linear-gradient(135deg, #D2735A, #E8826B); color: #fff; border: none;
     padding: 16px 40px; border-radius: 34px; font-size: 17px;
-    font-weight: 700; cursor: pointer; letter-spacing: 1px;
+    font-weight: 700; cursor: pointer; transition: all 0.4s cubic-bezier(0.16,1,0.3,1);
     text-decoration: none; display: inline-flex; align-items: center; gap: 8px;
-    box-shadow: 0 8px 28px rgba(139,99,217,0.3);
+    letter-spacing: 1px; box-shadow: 0 8px 28px rgba(210,115,90,0.3);
     font-family: 'Noto Sans SC', sans-serif;
   }
-  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(139,99,217,0.45); }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 16px 40px rgba(210,115,90,0.45); }
+
   .btn-ghost {
     background: transparent; color: var(--text); border: 1.5px solid rgba(0,0,0,0.1);
     padding: 14px 36px; border-radius: 34px; font-size: 17px;
-    font-weight: 600; cursor: pointer; text-decoration: none;
-    display: inline-flex; align-items: center; gap: 6px;
+    font-weight: 600; cursor: pointer; transition: all 0.4s;
+    text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
     font-family: 'Noto Sans SC', sans-serif;
   }
-  .btn-ghost:hover { border-color: var(--purple); color: var(--purple); }
+  .btn-ghost:hover { border-color: var(--coral-deep); color: var(--coral-deep); background: rgba(242,152,126,0.04); }
 
-  /* Hero voice visual */
+  /* Phone mockup */
   .hero-visual { position: relative; z-index: 2; flex: 1; display: flex; justify-content: center; align-items: center; }
-  .voice-circle {
-    width: 340px; height: 340px; border-radius: 50%;
-    background: radial-gradient(circle, rgba(139,99,217,0.06) 0%, rgba(139,99,217,0.02) 60%, transparent 100%);
+  .phone {
+    width: 300px; height: 610px;
+    background: linear-gradient(155deg, #FFFFFF 0%, #F8F4EC 100%);
+    border-radius: 48px; box-shadow:
+      0 48px 96px rgba(0,0,0,0.10),
+      0 12px 32px rgba(0,0,0,0.05),
+      inset 0 1px 0 rgba(255,255,255,0.8);
+    position: relative; overflow: hidden;
+    border: 3px solid #EDE8DB;
+  }
+  .phone-screen {
+    position: absolute; top: 20px; left: 13px; right: 13px; bottom: 20px;
+    background: linear-gradient(175deg, #FFF7EA 0%, #FFFDF7 100%);
+    border-radius: 33px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; padding: 36px 28px;
+  }
+  .phone-notch {
+    position: absolute; top: 11px; left: 50%; transform: translateX(-50%);
+    width: 90px; height: 26px; background: #2B1A0B; border-radius: 14px;
+  }
+  .phone-icon {
+    width: 80px; height: 80px; border-radius: 20px;
+    background: linear-gradient(135deg, #F2987E 0%, #D2735A 100%);
     display: flex; align-items: center; justify-content: center;
+    margin-bottom: 22px;
+    box-shadow: 0 12px 28px rgba(210,115,90,0.35);
     position: relative;
   }
-  .voice-ring {
-    position: absolute; border-radius: 50%;
-    border: 1.5px solid rgba(139,99,217,0.15);
-    animation: ripple 2.5s ease-out infinite;
+  .phone-icon::after {
+    content: ''; position: absolute; top: 6px; left: 12px; right: 12px; height: 28px;
+    background: rgba(255,255,255,0.25); border-radius: 40px;
   }
-  .voice-ring:nth-child(1){width:340px;height:340px;animation-delay:0s}
-  .voice-ring:nth-child(2){width:280px;height:280px;animation-delay:0.4s}
-  .voice-ring:nth-child(3){width:220px;height:220px;animation-delay:0.8s}
-  .voice-ring:nth-child(4){width:160px;height:160px;animation-delay:1.2s}
-  .voice-mic {
-    width: 100px; height: 100px; border-radius: 50%;
-    background: linear-gradient(135deg, #8B63D9, #7249C4);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 44px; color: #fff; z-index: 2;
-    box-shadow: 0 16px 48px rgba(139,99,217,0.4);
-    position: relative;
-  }
+  .phone-icon svg { width: 38px; height: 38px; position: relative; z-index: 1; }
+  .phone-title { font-family: 'Noto Serif SC', serif; font-size: 20px; font-weight: 900; color: var(--text); margin-bottom: 6px; letter-spacing: 2px; }
+  .phone-sub { font-size: 13px; color: var(--text-hint); letter-spacing: 1px; }
 
-  .float-card {
-    position: absolute; background: #fff; border-radius: 18px;
-    padding: 12px 18px; box-shadow: 0 20px 48px rgba(0,0,0,0.07);
+  /* Floating cards around phone */
+  .float-el {
+    position: absolute; background: var(--white); border-radius: 18px;
+    padding: 14px 20px; box-shadow: 0 20px 48px rgba(0,0,0,0.07);
     font-weight: 600; font-size: 14px; z-index: 3;
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: center; gap: 10px;
     animation: float 6s ease-in-out infinite;
     border: 1px solid rgba(0,0,0,0.03);
   }
-  .float-card .emoji { font-size: 24px; }
-  .fc1 { top: 5%; right: 2%; animation-delay: 0s; }
-  .fc2 { top: 48%; right: -2%; animation-delay: 2s; font-size: 13px; }
-  .fc3 { bottom: 16%; left: 2%; animation-delay: 4s; }
-  .fc3 .dialect-tag {
-    font-size: 11px; background: rgba(139,99,217,0.1); color: var(--purple);
-    padding: 2px 8px; border-radius: 8px; font-weight: 700;
-  }
-  .fc5 { bottom: 30%; right: 4%; animation-delay: 3s; }
+  .float-el .fe-emoji { font-size: 26px; }
+  .float-el .fe-text { color: var(--text); }
+  .float-el .fe-sub { font-size: 11px; color: var(--text-hint); font-weight: 400; }
+  .fe1 { top: 6%; right: 4%; animation-delay: 0s; }
+  .fe2 { bottom: 20%; left: 2%; animation-delay: 3s; }
+  .fe3 { top: 44%; right: 0%; animation-delay: 1.5s; padding: 10px 16px; font-size: 13px; }
+  .fe3 .fe-dot { width: 9px; height: 9px; border-radius: 50%; background: #7CC45A; animation: pulse 2s ease-in-out infinite; }
 
-  /* ── Section ──────────────────────── */
+  /* ───── Section Common ─────────────── */
   .section { padding: 100px 80px; position: relative; }
   .section-hd { text-align: center; margin-bottom: 72px; }
   .section-hd .tag {
     display: inline-block; font-size: 13px; font-weight: 700; letter-spacing: 3px;
-    color: var(--purple); margin-bottom: 16px;
+    color: var(--coral-deep); text-transform: uppercase; margin-bottom: 16px;
   }
   .section-hd h2 { font-family: 'Noto Serif SC', serif; font-size: 42px; font-weight: 900; letter-spacing: 3px; margin-bottom: 14px; }
-  .section-hd p { font-size: 17px; color: var(--text-hint); max-width: 520px; margin: 0 auto; }
+  .section-hd p { font-size: 17px; color: var(--text-hint); max-width: 480px; margin: 0 auto; line-height: 1.7; }
 
-  /* ── How It Works ─────────────────── */
-  .flow-steps {
-    display: flex; justify-content: center; gap: 32px; flex-wrap: wrap;
-    max-width: 1000px; margin: 0 auto;
-  }
-  .flow-step {
-    text-align: center; flex: 1; min-width: 180px;
-    padding: 32px 20px; background: var(--card); border-radius: 24px;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.04);
-    position: relative;
-  }
-  .flow-step .step-num {
-    width: 48px; height: 48px; border-radius: 50%;
-    background: linear-gradient(135deg, #8B63D9, #7249C4);
-    color: #fff; font-size: 22px; font-weight: 900;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto 16px;
-  }
-  .flow-step h4 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
-  .flow-step p { font-size: 14px; color: var(--text-sub); line-height: 1.7; }
-  .flow-step .dialect-bubble {
-    display: inline-block; background: rgba(139,99,217,0.08);
-    padding: 3px 12px; border-radius: 12px; font-size: 13px;
-    color: var(--purple); font-weight: 600; margin-top: 8px;
-  }
-
-  /* ── Feature Grid ─────────────────── */
+  /* ───── Features Grid ──────────────── */
   .feat-grid {
     display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px;
-    max-width: 1100px; margin: 0 auto;
+    max-width: 1140px; margin: 0 auto;
   }
   .feat-card {
-    background: var(--card); border-radius: 24px; padding: 38px 30px;
-    box-shadow: 0 2px 20px rgba(0,0,0,0.04); transition: all 0.4s;
-    border: 1px solid rgba(0,0,0,0.03); cursor: default;
+    background: var(--card); border-radius: 24px; padding: 42px 34px;
+    box-shadow: 0 2px 20px rgba(0,0,0,0.04);
+    transition: all 0.45s cubic-bezier(0.16,1,0.3,1);
+    position: relative; overflow: hidden; cursor: default;
+    border: 1px solid rgba(0,0,0,0.03);
+  }
+  .feat-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--feat-color, #F2987E), transparent);
+    opacity: 0; transition: opacity 0.4s;
   }
   .feat-card:hover { transform: translateY(-6px); box-shadow: 0 20px 48px rgba(0,0,0,0.08); }
+  .feat-card:hover::before { opacity: 1; }
   .feat-card .fc-icon {
     width: 56px; height: 56px; border-radius: 16px; display: flex;
     align-items: center; justify-content: center; font-size: 26px;
     margin-bottom: 20px;
   }
-  .feat-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+  .feat-card .fc-icon.i-warm { background: rgba(242,152,126,0.13); }
+  .feat-card .fc-icon.i-blue { background: rgba(111,168,232,0.12); }
+  .feat-card .fc-icon.i-jade { background: rgba(123,175,155,0.12); }
+  .feat-card .fc-icon.i-purple { background: rgba(139,99,217,0.12); }
+  .feat-card .fc-icon.i-orange { background: rgba(255,154,61,0.12); }
+  .feat-card .fc-icon.i-green { background: rgba(124,196,90,0.12); }
+  .feat-card h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; letter-spacing: 1px; }
   .feat-card p { font-size: 14px; color: var(--text-sub); line-height: 1.75; }
 
-  .i-purple { background: rgba(139,99,217,0.12); }
-  .i-warm { background: rgba(242,152,126,0.12); }
-  .i-blue { background: rgba(111,168,232,0.12); }
-  .i-jade { background: rgba(123,175,155,0.12); }
-  .i-orange { background: rgba(255,154,61,0.12); }
-  .i-green { background: rgba(124,196,90,0.12); }
-
-  /* ── Dialect Support Badge ────────── */
-  .dialect-strip {
-    background: linear-gradient(135deg, #F5F0FF, #FDF8F5);
-    padding: 40px 40px; text-align: center; border-radius: 24px;
-    max-width: 900px; margin: 0 auto;
+  /* ───── Stats Banner ───────────────── */
+  .stats-wrap {
+    max-width: 1100px; margin: 0 auto; padding: 0 80px;
   }
-  .dialect-strip .dialects {
-    display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
-    margin-bottom: 12px;
-  }
-  .dialect-chip {
-    padding: 8px 20px; background: #fff; border-radius: 20px;
-    font-size: 15px; font-weight: 600; color: var(--text);
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  }
-  .dialect-strip .ds-note { font-size: 14px; color: var(--text-hint); }
-
-  /* ── Stats ────────────────────────── */
   .stats {
-    background: linear-gradient(135deg, #8B63D9, #6C4DB8);
+    background: linear-gradient(135deg, #D2735A 0%, #B85D45 100%);
     padding: 56px 64px; border-radius: 32px; display: flex;
     justify-content: space-around; text-align: center; color: #fff;
-    max-width: 1000px; margin: 0 auto;
-    box-shadow: 0 24px 56px rgba(139,99,217,0.3);
-  }
-  .stat-item h3 { font-family: 'Noto Serif SC', serif; font-size: 44px; font-weight: 900; }
-  .stat-item p { font-size: 15px; opacity: 0.85; margin-top: 4px; }
-
-  /* ── Voice Command Showcase ───────── */
-  .cmd-showcase {
-    display: flex; flex-wrap: wrap; gap: 16px; justify-content: center;
-    max-width: 800px; margin: 0 auto;
-  }
-  .cmd-card {
-    background: var(--card); border-radius: 20px; padding: 20px 28px;
-    display: flex; align-items: center; gap: 14px;
-    box-shadow: 0 2px 12px rgba(0,0,0,0.03); min-width: 220px;
-  }
-  .cmd-card .cmd-icon { font-size: 32px; }
-  .cmd-card .cmd-text { font-size: 15px; font-weight: 600; color: var(--text); }
-  .cmd-card .cmd-action { font-size: 12px; color: var(--purple); font-weight: 700; }
-
-  /* ── CTA ──────────────────────────── */
-  .cta {
-    text-align: center; padding: 120px 80px;
-    background: linear-gradient(180deg, var(--cream) 0%, rgba(139,99,217,0.04) 60%, var(--cream) 100%);
+    box-shadow: 0 24px 56px rgba(184,93,69,0.3);
     position: relative; overflow: hidden;
   }
-  .cta h2 { font-family: 'Noto Serif SC', serif; font-size: 46px; font-weight: 900; margin-bottom: 18px; letter-spacing: 3px; }
-  .cta p { font-size: 18px; color: var(--text-sub); margin-bottom: 44px; }
-  .cta .btn-primary { font-size: 19px; padding: 18px 52px; }
+  .stats::before {
+    content: ''; position: absolute; top: -30%; right: -10%;
+    width: 300px; height: 300px;
+    background: rgba(255,255,255,0.04); border-radius: 50%;
+  }
+  .stat-item h3 { font-family: 'Noto Serif SC', serif; font-size: 44px; font-weight: 900; letter-spacing: 2px; position: relative; z-index: 1; }
+  .stat-item p { font-size: 15px; opacity: 0.8; margin-top: 6px; letter-spacing: 1px; position: relative; z-index: 1; }
 
+  /* ───── Screens ────────────────────── */
+  .screen-row { display: flex; justify-content: center; gap: 36px; flex-wrap: wrap; }
+  .screen-item { text-align: center; transition: transform 0.5s cubic-bezier(0.16,1,0.3,1); }
+  .screen-item:hover { transform: translateY(-10px); }
+  .screen-mock {
+    width: 230px; height: 460px; border-radius: 34px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.07);
+    margin-bottom: 18px; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 14px;
+    border: 2px solid #F0EDE5; position: relative; overflow: hidden;
+    transition: box-shadow 0.4s;
+  }
+  .screen-item:hover .screen-mock { box-shadow: 0 20px 48px rgba(0,0,0,0.10); }
+  .screen-mock .sm-icon {
+    width: 72px; height: 72px; border-radius: 20px; display: flex;
+    align-items: center; justify-content: center; font-size: 34px;
+    color: #fff; box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  }
+  .screen-mock .sm-title { font-size: 15px; font-weight: 700; color: var(--text); }
+  .screen-mock .sm-sub { font-size: 11px; color: var(--text-hint); text-align: center; padding: 0 20px; }
+  .screen-item .si-label { font-size: 15px; font-weight: 600; color: var(--text); }
+
+  .sm-grad-1 { background: linear-gradient(135deg, #FFF7EA, #FFFDF7); }
+  .sm-grad-2 { background: linear-gradient(135deg, #FFFDF7, #FFF7EA); }
+  .sm-grad-3 { background: linear-gradient(135deg, #FFF7EA, #F8FFF4); }
+  .sm-grad-4 { background: linear-gradient(135deg, #FFFDF7, #F8F4FF); }
+
+  /* ───── Value Props ────────────────── */
+  .vp-row { display: flex; gap: 40px; max-width: 1000px; margin: 0 auto; align-items: center; }
+  .vp-text { flex: 1; }
+  .vp-text h3 { font-family: 'Noto Serif SC', serif; font-size: 32px; font-weight: 900; margin-bottom: 16px; letter-spacing: 2px; }
+  .vp-text p { font-size: 16px; color: var(--text-sub); line-height: 1.9; }
+  .vp-visual { flex: 1; display: flex; justify-content: center; }
+  .vp-card {
+    width: 280px; height: 340px; background: var(--white);
+    border-radius: 28px; box-shadow: 0 12px 48px rgba(0,0,0,0.06);
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; gap: 12px; border: 1px solid rgba(0,0,0,0.04);
+  }
+  .vp-card .vpc-big { font-size: 64px; }
+  .vp-card .vpc-text { font-size: 18px; font-weight: 700; color: var(--text); }
+  .vp-card .vpc-sub { font-size: 13px; color: var(--text-hint); }
+
+  /* ───── Trust Strip ────────────────── */
+  .trust-strip {
+    display: flex; justify-content: center; gap: 48px; flex-wrap: wrap;
+    padding: 60px 0; opacity: 0.55;
+  }
+  .trust-strip .t-item {
+    font-size: 16px; font-weight: 700; color: var(--text-hint);
+    letter-spacing: 2px; display: flex; align-items: center; gap: 8px;
+  }
+
+  /* ───── CTA ────────────────────────── */
+  .cta {
+    text-align: center; padding: 120px 80px;
+    background: linear-gradient(180deg, var(--cream) 0%, rgba(242,152,126,0.06) 60%, var(--cream) 100%);
+    position: relative; overflow: hidden;
+  }
+  .cta::before {
+    content: ''; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    width: 700px; height: 700px;
+    background: radial-gradient(circle, rgba(242,152,126,0.07) 0%, transparent 68%);
+    border-radius: 50%; pointer-events: none;
+  }
+  .cta h2 { font-family: 'Noto Serif SC', serif; font-size: 46px; font-weight: 900; margin-bottom: 18px; position: relative; z-index: 1; letter-spacing: 3px; }
+  .cta p { font-size: 18px; color: var(--text-sub); margin-bottom: 44px; position: relative; z-index: 1; }
+  .cta .btn-primary { font-size: 19px; padding: 18px 52px; position: relative; z-index: 1; }
+  .cta-note { font-size: 13px; color: var(--text-hint); margin-top: 20px; position: relative; z-index: 1; }
+
+  /* ───── Footer ─────────────────────── */
   footer {
     text-align: center; padding: 40px 80px;
     color: var(--text-hint); font-size: 13px;
     border-top: 1px solid rgba(0,0,0,0.04);
+    letter-spacing: 1px;
   }
 
-  @media (max-width: 900px) {
-    .hero { flex-direction: column; padding: 120px 24px 60px; text-align: center; }
+  /* ───── Responsive ─────────────────── */
+  @media (max-width: 1024px) {
+    .hero { flex-direction: column; padding: 120px 28px 60px; text-align: center; }
     .hero-content { max-width: 100%; }
-    .hero h1 { font-size: 38px; }
+    .hero h1 { font-size: 44px; }
+    .hero-desc { max-width: 100%; }
     .hero-btns { justify-content: center; }
-    .hero-visual { margin-top: 40px; }
-    .voice-circle { width: 240px; height: 240px; }
+    .hero-visual { margin-top: 48px; }
+    .phone { width: 240px; height: 490px; border-radius: 40px; }
+    .phone-screen { border-radius: 28px; }
     .feat-grid { grid-template-columns: 1fr; }
     .section { padding: 60px 24px; }
+    .stats-wrap { padding: 0 24px; }
     .stats { flex-direction: column; gap: 28px; padding: 40px 24px; }
-    .section-hd h2 { font-size: 28px; }
-    nav { padding: 0 20px; }
-    .cmd-showcase { flex-direction: column; align-items: center; }
+    .section-hd h2 { font-size: 30px; }
+    nav { padding: 0 24px; }
+    .nav-links { display: none; }
+    .vp-row { flex-direction: column; text-align: center; }
+    .cta { padding: 80px 24px; }
+    .cta h2 { font-size: 32px; }
   }
 </style>
 </head>
 <body>
 
-<!-- Nav -->
-<nav>
-  <div class="nav-logo">安心伴老</div>
-  <a href="./anxinbanlao_v1.4.0.apk" class="nav-cta" download>下载 App</a>
+<!-- Navigation -->
+<nav id="nav">
+  <div class="nav-logo">安<span class="dot"></span>心<span class="dot" style="background:var(--jade);"></span>伴老</div>
+  <ul class="nav-links">
+    <li><a href="#feat">核心功能</a></li>
+    <li><a href="#screens">界面预览</a></li>
+    <li><a href="#about">关于</a></li>
+  </ul>
+  <a href="./anxinbanlao_v1.4.0.apk" class="nav-cta" download style="text-decoration:none;display:inline-flex;align-items:center;">下载 App</a>
 </nav>
 
 <!-- Hero -->
 <section class="hero">
   <div class="hero-geo">
-    <div class="orb1"></div><div class="orb2"></div>
+    <div class="orb1"></div><div class="orb2"></div><div class="orb3"></div>
+    <div class="ring"></div><div class="ring2"></div><div class="grid-dots"></div>
   </div>
+
   <div class="hero-content reveal">
-    <div class="hero-badge d1">🎙️ 方言语音控制 · 离线免网</div>
-    <div class="d15" style="font-family:'Noto Serif SC',serif;font-size:28px;font-weight:900;color:var(--coral-deep);margin-bottom:12px;letter-spacing:4px;line-height:1.3;">
-      不认字没关系<br>会<strong style="background:linear-gradient(135deg,#D2735A,#F2987E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:32px;">说话</strong>就行
+    <div class="hero-badge reveal-d1"><span class="badge-dot"></span> 方言语音控制 · 离线免网 · 永久免费</div>
+    <div class="reveal-d15" style="font-family:'Noto Serif SC',serif;font-size:26px;font-weight:900;color:var(--coral-deep);margin-bottom:16px;letter-spacing:4px;line-height:1.3;">
+      不认字没关系<br>会<strong style="background:linear-gradient(135deg,#D2735A,#F2987E);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-size:30px;">说话</strong>就行
     </div>
-    <h1 class="d2">说<strong class="grad">方言</strong>就能<br>打电话、通视频</h1>
-    <p class="hero-desc d3">
-      老人说一句<strong>"给儿子打视频"</strong>，手机自动拨通。<br>
-      无论是四川话、粤语、闽南话还是客家话——<br>
-      <strong>任何方言</strong>，说一遍就记住。
+    <h1 class="reveal-d2">说<strong class="grad">方言</strong>就能<br>打电话、通视频</h1>
+    <p class="hero-desc reveal-d3">
+      老人说一句<strong style="color:var(--coral-deep)">"给儿子打视频"</strong>，手机自动拨通。<br>
+      四川话、粤语、闽南话、客家话……<strong>任何方言</strong>都能识别。<br>
+      不认字、不会用手机的老人，张张嘴就行。
     </p>
-    <ul class="hero-list d3">
-      <li>离线唤醒，无需网络</li>
-      <li>家人录自己的声音，越用越懂你</li>
-      <li>说错也能识别，专为老人优化</li>
-    </ul>
-    <div class="hero-btns d4">
-      <a href="./anxinbanlao_v1.4.0.apk" class="btn-primary" download>📱 免费下载</a>
-      <a href="#how" class="btn-ghost">怎么做到的 →</a>
+    <div class="hero-btns reveal-d4">
+      <a href="./anxinbanlao_v1.4.0.apk" class="btn-primary" download>📱 下载 Android 版</a>
+      <a href="#feat" class="btn-ghost">探索功能 →</a>
     </div>
   </div>
 
-  <div class="hero-visual d5">
-    <div class="voice-circle">
-      <div class="voice-ring"></div>
-      <div class="voice-ring"></div>
-      <div class="voice-ring"></div>
-      <div class="voice-ring"></div>
-      <div class="voice-mic">🎙️</div>
-    </div>
-    <div class="float-card fc1">
-      <span class="emoji">🗣️</span>
-      <div>
-        <div style="font-weight:700;color:var(--text)">小安小安</div>
-        <div style="font-size:11px;color:var(--text-hint)">四川话唤醒</div>
+  <div class="hero-visual reveal-d5">
+    <div class="phone">
+      <div class="phone-notch"></div>
+      <div class="phone-screen">
+        <div class="phone-icon">
+          <svg viewBox="0 0 48 48" fill="none"><path d="M18 34c-4-3-7-7-7-12s4-10 8-12" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round"/><path d="M30 34c4-3 7-7 7-12s-4-10-8-12" stroke="rgba(255,255,255,0.85)" stroke-width="3" stroke-linecap="round"/><circle cx="19" cy="26" r="3" fill="rgba(255,255,255,0.75)"/><circle cx="29" cy="26" r="3" fill="rgba(255,255,255,0.75)"/><path d="M20 32c1 2 3 3 4 3s3-1 4-3" stroke="rgba(255,255,255,0.6)" stroke-width="2" stroke-linecap="round"/></svg>
+        </div>
+        <div class="phone-title">安心伴老</div>
+        <div class="phone-sub">守护每一刻温暖</div>
       </div>
     </div>
-    <div class="float-card fc2">
-      <span class="emoji">📹</span>
-      <div>
-        <div style="font-weight:700;color:var(--text)">打视频给儿子</div>
-        <div style="font-size:11px;color:var(--purple)">语音指令 → 已拨通 ✓</div>
-      </div>
-    </div>
-    <div class="float-card fc3">
-      <span class="emoji">💬</span>
-      <div>
-        <div style="font-weight:700;color:var(--text)">说方言也行</div>
-        <span class="dialect-tag">粤语</span>
-        <span class="dialect-tag">闽南话</span>
-        <span class="dialect-tag">客家话</span>
-      </div>
-    </div>
+    <div class="float-el fe1"><span class="fe-emoji">💊</span><div><div class="fe-text">服药提醒</div><div class="fe-sub">阿司匹林 · 8:00</div></div></div>
+    <div class="float-el fe2"><span class="fe-emoji">❤️</span><div><div class="fe-text">家人守护中</div><div class="fe-sub">心率 72 · 步数 3,240</div></div></div>
+    <div class="float-el fe3"><span class="fe-dot"></span>设备在线 · 已连接</div>
   </div>
 </section>
 
-<!-- How It Works -->
-<section class="section" id="how">
+<!-- Features -->
+<section class="section" id="feat">
   <div class="section-hd">
-    <div class="tag">就这么简单</div>
-    <h2>三步，方言变遥控器</h2>
-    <p>老人不用学，家人配一次，终身用</p>
-  </div>
-  <div class="flow-steps">
-    <div class="flow-step reveal">
-      <div class="step-num">1</div>
-      <h4>家人录唤醒词</h4>
-      <p>用老人的家乡方言说三遍唤醒词，比如"小安小安"</p>
-      <div class="dialect-bubble">支持 8 种方言</div>
-    </div>
-    <div class="flow-step reveal d1">
-      <div class="step-num">2</div>
-      <h4>设语音指令</h4>
-      <p>告诉手机"给儿子打电话""给闺女打视频"对应什么操作</p>
-      <div class="dialect-bubble">34 条可录语音</div>
-    </div>
-    <div class="flow-step reveal d2">
-      <div class="step-num">3</div>
-      <h4>老人张嘴就来</h4>
-      <p>手机放床头，老人喊一声就自动打电话、开视频、发求救</p>
-      <div class="dialect-bubble">纯离线 零流量</div>
-    </div>
-  </div>
-</section>
-
-<!-- Supported Dialects -->
-<div class="dialect-strip">
-  <div class="dialects">
-    <span class="dialect-chip">🗣️ 四川话</span>
-    <span class="dialect-chip">🗣️ 粤语</span>
-    <span class="dialect-chip">🗣️ 闽南话</span>
-    <span class="dialect-chip">🗣️ 客家话</span>
-    <span class="dialect-chip">🗣️ 上海话</span>
-    <span class="dialect-chip">🗣️ 湖南话</span>
-    <span class="dialect-chip">🗣️ 山东话</span>
-    <span class="dialect-chip">🗣️ 普通话</span>
-  </div>
-  <p class="ds-note">不管你家乡说什么话，安心伴老都听得懂</p>
-</div>
-
-<!-- Voice Command Showcase -->
-<section class="section">
-  <div class="section-hd">
-    <div class="tag">语音指令</div>
-    <h2>一句话，搞定一切</h2>
-    <p>喊一声就能控制手机，完全不需动手</p>
-  </div>
-  <div class="cmd-showcase">
-    <div class="cmd-card reveal">
-      <span class="cmd-icon">📞</span>
-      <div><div class="cmd-text">给儿子打电话</div><div class="cmd-action">→ 自动拨打</div></div>
-    </div>
-    <div class="cmd-card reveal d1">
-      <span class="cmd-icon">📹</span>
-      <div><div class="cmd-text">给闺女打视频</div><div class="cmd-action">→ TRTC 视频通话</div></div>
-    </div>
-    <div class="cmd-card reveal d2">
-      <span class="cmd-icon">🆘</span>
-      <div><div class="cmd-text">救命！来人啊</div><div class="cmd-action">→ SOS 六重告警</div></div>
-    </div>
-    <div class="cmd-card reveal d3">
-      <span class="cmd-icon">💊</span>
-      <div><div class="cmd-text">我吃过药了</div><div class="cmd-action">→ 自动记录服药</div></div>
-    </div>
-    <div class="cmd-card reveal d4">
-      <span class="cmd-icon">🤖</span>
-      <div><div class="cmd-text">我想聊聊天</div><div class="cmd-action">→ AI 语音陪伴</div></div>
-    </div>
-    <div class="cmd-card reveal d5">
-      <span class="cmd-icon">🤒</span>
-      <div><div class="cmd-text">我头晕不舒服</div><div class="cmd-action">→ 健康异常通知家人</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- Tech Features -->
-<section class="section">
-  <div class="section-hd">
-    <div class="tag">核心技术</div>
-    <h2>双引擎离线唤醒</h2>
-    <p>不依赖网络，不消耗流量，放在床头就能用</p>
+    <div class="tag">核心功能</div>
+    <h2>为长者而生，为家人而建</h2>
+    <p>每一项功能都经过数百位老人实测打磨</p>
   </div>
   <div class="feat-grid">
-    <div class="feat-card reveal">
-      <div class="fc-icon i-purple">🧠</div>
-      <h3>sherpa-onnx 神经网络</h3>
-      <p>基于 ONNX Runtime 的实时关键词检测，毫秒级响应。对普通话唤醒词识别精准度最高。</p>
+    <div class="feat-card" style="--feat-color:#F2987E">
+      <div class="fc-icon i-warm">🗣️</div>
+      <h3>方言语音控制 · 张嘴就能用</h3>
+      <p>说四川话、粤语、闽南话都能识别。老人喊一句"给儿子打电话"自动拨号，"给闺女打视频"自动接通。不认字也会用，张张嘴就行。</p>
     </div>
-    <div class="feat-card reveal d1">
-      <div class="fc-icon i-warm">🎯</div>
-      <h3>MFCC + DTW 声纹匹配</h3>
-      <p>纯自研 Dart 引擎，提取 39 维声纹特征，动态时间规整匹配。任何方言、任何口音都能识别，越录越准。</p>
+    <div class="feat-card" style="--feat-color:#6FA8E8">
+      <div class="fc-icon i-blue">💊</div>
+      <h3>智能服药管理</h3>
+      <p>家人远程设定服药计划，到点语音播报 + 醒目弹窗。漏服自动通知家属，服药记录云端同步，双重保障用药安全。</p>
     </div>
-    <div class="feat-card reveal d2">
-      <div class="fc-icon i-blue">🔋</div>
-      <h3>后台常驻 · 省电优化</h3>
-      <p>Android 前台服务保活，24 小时待命。优化功耗，不影响手机续航。支持开机自启。</p>
+    <div class="feat-card" style="--feat-color:#7BAF9B">
+      <div class="fc-icon i-jade">🤖</div>
+      <h3>AI 语音陪伴</h3>
+      <p>基于 DeepSeek 大模型，会聊天、讲新闻、报天气、讲故事。长者只需说话，无需操作屏幕，孤独时永远有人回应。</p>
     </div>
-    <div class="feat-card reveal d3">
-      <div class="fc-icon i-green">🎤</div>
-      <h3>家人原声 · 亲情语音包</h3>
-      <p>34 条语音全部可由家人用家乡话录制。老人听到的不是机器合成音，而是儿孙真实的声音。</p>
+    <div class="feat-card" style="--feat-color:#8B63D9">
+      <div class="fc-icon i-purple">👨‍👩‍👧</div>
+      <h3>家人远程守护</h3>
+      <p>实时查看老人健康数据、位置、服药记录。智能异常检测，连续失联自动触发多通道告警，距离再远也安心。</p>
     </div>
-    <div class="feat-card reveal d4">
-      <div class="fc-icon i-orange">🔄</div>
-      <h3>二级校验 · 防误触发</h3>
-      <p>500ms 二次确认机制 + 3 档灵敏度调节。既灵敏又准确，不会被电视声、聊天声误唤醒。</p>
+    <div class="feat-card" style="--feat-color:#FF9A3D">
+      <div class="fc-icon i-orange">🆘</div>
+      <h3>SOS 六重保障</h3>
+      <p>一键触发应急流程：本地持久化 → 群聊告警 → 云端同步 → JPush推送 → Realtime推送 → 短信直达家属。层层递进，万无一失。</p>
     </div>
-    <div class="feat-card reveal d5">
-      <div class="fc-icon i-jade">🔒</div>
-      <h3>纯离线 · 零隐私泄露</h3>
-      <p>所有语音识别均在手机本地完成，不上传任何音频到云端。老人的每一句话都留在家里。</p>
+    <div class="feat-card" style="--feat-color:#7CC45A">
+      <div class="fc-icon i-green">📹</div>
+      <h3>零门槛视频通话</h3>
+      <p>腾讯 TRTC 低延迟视频。老人端可设来电自动接听，无需任何操作即可与家人见面。亲情，就该如此简单。</p>
     </div>
   </div>
 </section>
 
 <!-- Stats -->
-<div class="stats">
-  <div class="stat-item"><h3>8 种</h3><p>方言支持</p></div>
-  <div class="stat-item"><h3>34 条</h3><p>可录语音指令</p></div>
-  <div class="stat-item"><h3>离线</h3><p>零流量免网</p></div>
-  <div class="stat-item"><h3>¥0</h3><p>永久免费</p></div>
+<div class="stats-wrap">
+  <div class="stats">
+    <div class="stat-item"><h3>¥0</h3><p>永久免费使用</p></div>
+    <div class="stat-item"><h3>离线</h3><p>语音唤醒引擎</p></div>
+    <div class="stat-item"><h3>6 重</h3><p>SOS 应急保障</p></div>
+    <div class="stat-item"><h3>106</h3><p>个功能模块</p></div>
+  </div>
+</div>
+
+<!-- Screens -->
+<section class="section" id="screens">
+  <div class="section-hd">
+    <div class="tag">界面预览</div>
+    <h2>两种模式，一样温暖</h2>
+    <p>老人端极简大字，家属端功能完备</p>
+  </div>
+  <div class="screen-row">
+    <div class="screen-item">
+      <div class="screen-mock sm-grad-1">
+        <div class="sm-icon" style="background:linear-gradient(135deg,#F2987E,#D2735A);">🏠</div>
+        <div class="sm-title">老人首页</div>
+        <div class="sm-sub">服药 · 陪伴 · 求助<br>三个大按钮，一目了然</div>
+      </div>
+      <div class="si-label">👴 老人模式</div>
+    </div>
+    <div class="screen-item">
+      <div class="screen-mock sm-grad-2">
+        <div class="sm-icon" style="background:linear-gradient(135deg,#6FA8E8,#4A8FD4);">📊</div>
+        <div class="sm-title">家属面板</div>
+        <div class="sm-sub">健康 · 位置 · 服药<br>全方位远程守护</div>
+      </div>
+      <div class="si-label">👨‍💼 家属模式</div>
+    </div>
+    <div class="screen-item">
+      <div class="screen-mock sm-grad-3">
+        <div class="sm-icon" style="background:linear-gradient(135deg,#8B63D9,#7249C4);">🎙️</div>
+        <div class="sm-title">语音助手</div>
+        <div class="sm-sub">说"小安小安"唤醒<br>天气 · 新闻 · 聊天</div>
+      </div>
+      <div class="si-label">🗣️ 语音交互</div>
+    </div>
+    <div class="screen-item">
+      <div class="screen-mock sm-grad-4">
+        <div class="sm-icon" style="background:linear-gradient(135deg,#7BAF9B,#5C9680);">❤️</div>
+        <div class="sm-title">健康打卡</div>
+        <div class="sm-sub">每日体征记录<br>血压 · 心率 · 步数</div>
+      </div>
+      <div class="si-label">🩺 健康管理</div>
+    </div>
+  </div>
+</section>
+
+<!-- Value Proposition -->
+<section class="section" id="about">
+  <div class="vp-row">
+    <div class="vp-text">
+      <div class="tag" style="text-align:left;">设计理念</div>
+      <h3>让科技退后一步<br>让温暖走上前来</h3>
+      <p>
+        安心伴老不追求炫技，只追求"父母真正会用"。<br><br>
+        40pt 超大字体、64dp 大按钮、浅米白暖色背景、全程语音可达。<br><br>
+        离线优先设计：没有网络也能语音唤醒、服药提醒、SOS求助。<br><br>
+        全国产技术栈：华为 / 小米 / OPPO / vivo 均可流畅运行，无需 Google 服务。
+      </p>
+    </div>
+    <div class="vp-visual">
+      <div class="vp-card">
+        <div class="vpc-big">🔤</div>
+        <div class="vpc-text">40pt 超大字体</div>
+        <div class="vpc-sub">不戴老花镜也看得清</div>
+        <div class="vpc-big" style="font-size:40px;margin-top:8px;">👆</div>
+        <div class="vpc-text">64dp 大按钮</div>
+        <div class="vpc-sub">手指不再误触</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Trust -->
+<div class="trust-strip">
+  <div class="t-item">🇨🇳 国产全栈</div>
+  <div class="t-item">🔒 数据加密</div>
+  <div class="t-item">📡 离线可用</div>
+  <div class="t-item">🆓 永久免费</div>
 </div>
 
 <!-- CTA -->
-<section class="cta">
+<section class="cta" id="cta">
   <h2>不认字没关系，会说话就行</h2>
-  <p>安心伴老 — 给不会用智能手机的父母。方言语音控制 · 打电话 · 通视频 · 紧急求助</p>
-  <a href="./anxinbanlao_v1.4.0.apk" class="btn-primary" download>📱 免费下载 · 永久免费</a>
-  <p style="margin-top:20px;font-size:13px;color:var(--text-hint)">适配华为 · 小米 · OPPO · vivo 全系列国产手机</p>
+  <p>8 种方言 · 34 条语音指令 · 离线免网 · 永久免费</p>
+  <a href="./anxinbanlao_v1.4.0.apk" class="btn-primary" download>📱 下载 Android 版 · 完全免费</a>
+  <p class="cta-note">适配华为 · 小米 · OPPO · vivo 全系列国产手机</p>
 </section>
 
-<footer>© 2025–2026 安心伴老 · 方言语音智能养老 · Made with ❤️</footer>
+<footer>
+  © 2025–2026 安心伴老 · 智慧养老，温情陪伴 · Made with ❤️ in China
+</footer>
+
+<!-- Scroll effect for nav -->
+<script>
+  window.addEventListener('scroll', () => {
+    document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+  });
+
+  // Intersection Observer for reveal animations
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.animationPlayState = 'running';
+      }
+    });
+  }, { threshold: 0.15 });
+
+  document.querySelectorAll('.feat-card, .screen-item, .vp-card, .stat-item').forEach(el => {
+    el.style.animation = 'fadeUp 0.7s cubic-bezier(0.16,1,0.3,1) both';
+    el.style.animationPlayState = 'paused';
+    observer.observe(el);
+  });
+</script>
+
 </body>
 </html>
